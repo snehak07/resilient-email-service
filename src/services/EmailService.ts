@@ -1,5 +1,4 @@
-import { EmailPayload, SendResult } from '../types/Email';
-import { EmailProvider } from '../providers/MockProviderA';
+import { EmailPayload, SendResult, EmailProvider } from '../types/Email';
 import { Logger } from '../utils/Logger';
 
 
@@ -68,18 +67,18 @@ private cooldownTime = 60 * 1000; // 60 seconds
         } catch (err) {
             Logger.error(`Attempt ${attempt + 1} with provider ${i + 1} failed. Reason: ${(err as Error).message}`);
           await this.delay(this.getBackoffDelay(attempt));
-  
-          const currentFailures = this.failureCounts.get(provider) || 0;
-          const newFailureCount = currentFailures + 1;
-          this.failureCounts.set(provider, newFailureCount);
-  
-          if (newFailureCount >= this.maxFailures) {
-            const cooldownUntil = Date.now() + this.cooldownTime;
-            this.circuitOpenUntil.set(provider, cooldownUntil);
-            Logger.error(`Circuit opened for provider ${i + 1} until ${new Date(cooldownUntil).toISOString()}`);
-            break; // stop retrying this provider, move to next
-          }
         }
+      }
+
+      // All retry attempts failed for this provider, increment failure count once
+      const currentFailures = this.failureCounts.get(provider) || 0;
+      const newFailureCount = currentFailures + 1;
+      this.failureCounts.set(provider, newFailureCount);
+
+      if (newFailureCount >= this.maxFailures) {
+        const cooldownUntil = Date.now() + this.cooldownTime;
+        this.circuitOpenUntil.set(provider, cooldownUntil);
+        Logger.error(`Circuit opened for provider ${i + 1} until ${new Date(cooldownUntil).toISOString()}`);
       }
   
       Logger.info(`Provider ${i + 1} exhausted. Falling back...`);

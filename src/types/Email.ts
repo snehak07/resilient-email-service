@@ -7,4 +7,8 @@ export interface EmailPayload {
   export interface SendResult {
     status: 'sent' | 'failed' | 'duplicate' | 'rate_limited';
   }
+
+  export interface EmailProvider {
+    send(email: EmailPayload): Promise<void>;
+  }
   
