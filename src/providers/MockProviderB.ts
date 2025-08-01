@@ -1,5 +1,4 @@
-import { EmailPayload } from '../types/Email';
-import { EmailProvider } from './MockProviderA';
+import { EmailPayload, EmailProvider } from '../types/Email';
 import { Logger } from '../utils/Logger';
 
 
